@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import torch
 
 from .. import beta_features, settings
@@ -234,7 +235,10 @@ class LazyEvaluatedKernelTensor(LazyTensor):
         )
 
     def add_jitter(self, jitter_val=1e-3):
-        return self.evaluate_kernel().add_jitter(jitter_val)
+        if 'GPYTORCH_LAZY_JITTER' in os.environ.keys():
+            return super(LazyEvaluatedKernelTensor, self).add_jitter(jitter_val)
+        else:
+            return self.evaluate_kernel().add_jitter(jitter_val)
 
     def _unsqueeze_batch(self, dim):
         return self[(slice(None),) * dim + (None,)]
